@@ -81,6 +81,9 @@ input:focus{border-color:#3a424b}
 #rbar button{padding:13px 18px;font-size:15px}#rbar #rbn{flex:1;max-width:340px}
 #rext{display:none}button:disabled{opacity:.35;cursor:default}
 body.reading #bal{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+.tools label.dt{margin-left:auto;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid #5a2a2e;color:var(--tx);font:500 13px var(--h);padding:5px 6px 5px 12px;border-radius:8px}
+.tools label.dt.need{border-color:var(--red2);box-shadow:0 0 0 3px #ff6a6f26}
+@media(max-width:520px){.tools label.dt{width:100%;justify-content:space-between}}
 .note{color:var(--mut);font:12px/1.5 var(--h);margin-top:28px;padding-top:14px;border-top:1px solid var(--line)}
 @media(max-width:520px){.mh .mini{display:none}.mh p{font-size:12px}.tools label{margin-left:0}h1{font-size:19px}}
 </style></head><body><div class="wrap">
@@ -98,7 +101,7 @@ body.reading #bal{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
 <div class="today"><div><div class="sub">PRÓXIMA OPERAÇÃO</div><h2 id="tt">—</h2><div class="sub" id="ts"></div></div><button id="go">Abrir missão</button></div>
 <div class="tools">
 <button class="ghost on" data-f="all">Todas</button><button class="ghost" data-f="pend">Pendentes</button><button class="ghost" data-f="done">Concluídas</button>
-<label>PDF: <input type="text" id="pdfn" style="width:230px;background:#0a0e12;color:var(--tx);border:1px solid var(--line);border-radius:4px;padding:7px 9px;font:13px var(--m)"></label><label style="margin-left:0">Início: <input type="date" id="start"></label></div>
+<label style="display:none">PDF: <input type="text" id="pdfn" style="width:230px;background:#0a0e12;color:var(--tx);border:1px solid var(--line);border-radius:4px;padding:7px 9px;font:13px var(--m)"></label><label class="dt">📅 Data de início do estudo <input type="date" id="start"></label></div>
 <div class="grid" id="grid"></div>
 <div class="note">Artigos e páginas foram mapeados automaticamente a partir do texto do PDF (páginas conforme a numeração impressa de cada Parte). Confira no PDF em caso de dúvida. Progresso salvo neste aparelho.</div>
 </div>
@@ -120,7 +123,7 @@ function prog(n){const m=M[n-1],s=st(n);return s.done?1:s.c.filter(x=>x<steps(m)
 function dueDay(n){if(!S.start)return null;const d=new Date(S.start+'T00:00:00');d.setDate(d.getDate()+n-1);return d}
 function render(){
  const done=M.filter(m=>st(m.n).done).length;
- $('cnt').textContent=done+'/120';$('hrs').textContent=fmtH(S.total||0);$('pb').style.width=done/1.2+'%';
+ $('cnt').textContent=done+'/120';$('hrs').textContent=fmtH(S.total||0);document.querySelector('.dt').classList.toggle('need',!S.start);$('pb').style.width=done/1.2+'%';
  $('pt').textContent=Math.round(done/1.2)+'% da operação concluída';
  $('rank').textContent=RANKS.filter(r=>done>=r[0]).pop()[1];
  const ds=[...new Set(M.filter(m=>st(m.n).done).map(m=>st(m.n).done))].sort();
@@ -157,7 +160,7 @@ G.addEventListener('click',e=>{
  if(e.target.closest('.mh')){const n=nOf(e);exp=exp===n?0:n;render();const r=G.querySelector('.m[data-n="'+n+'"]');if(exp&&r)r.scrollIntoView({block:'nearest'})}});
 $('go').onclick=()=>{if(!open)return;exp=open;render();const r=G.querySelector('.m[data-n="'+open+'"]');if(r)r.scrollIntoView({block:'center'})};
 document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{flt=b.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));render()});
-$('pdfn').value=S.pdf||'POLICIA_RODOVIARIA_FEDERAL__1_.pdf';$('pdfn').onchange=e=>{S.pdf=e.target.value.trim();save()};
+delete S.pdf;save();
 $('start').value=S.start;$('start').onchange=e=>{S.start=e.target.value;save();render()};
 let T=S.timer||null,pip=null;
 function fmt(x){return [Math.floor(x/3600),Math.floor(x%3600/60),x%60].map(v=>String(v).padStart(2,'0')).join(':')}
